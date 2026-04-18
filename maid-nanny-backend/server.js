@@ -64,6 +64,15 @@ app.use('/api/helpers', helperRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/platform', platformRoutes);
 
+// Welcome Route
+app.get('/', (req, res) => {
+  res.status(200).send({
+    message: "Maid & Nanny API Service is Running",
+    status: "Healthy",
+    documentation: "/api/admin/stats"
+  });
+});
+
 // Admin Stats
 app.get('/api/admin/stats', async (req, res) => {
   try {
