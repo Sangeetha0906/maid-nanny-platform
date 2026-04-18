@@ -10,7 +10,7 @@ const app = express();
 // Allow multiple origins in production
 const allowedOrigins = [
   'http://localhost:5173',
-  process.env.FRONTEND_URL // To be set in Render
+  process.env.FRONTEND_URL 
 ];
 
 app.use(cors({
@@ -25,12 +25,32 @@ app.use(cors({
 
 app.use(express.json());
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/maid-nanny-db')
-  .then(() => console.log('✅ Connected to MongoDB via Mongoose'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+// MongoDB Connection (Cached for Serverless)
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
-// Pre-load Models for reliability
+async function connectDB() {
+  if (cached.conn) return cached.conn;
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/maid-nanny-db').then((m) => m);
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
+
+// Middleware to ensure DB connection on every request (Vercel best practice)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({ message: "Database Connection Failed" });
+  }
+});
+
+// Pre-load Models
 import { User, Helper, Booking, Complaint } from './models/index.js';
 
 // Routes Configuration
@@ -60,5 +80,10 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Backend Server running on port ${PORT}`));
+// Only listen locally, Vercel handles this in production
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`🚀 Backend Server running on port ${PORT}`));
+}
+
+export default app;

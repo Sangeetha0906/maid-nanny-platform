@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['household', 'helper', 'admin'], default: 'household' }
 });
 
-export const User = mongoose.model('User', userSchema);
+export const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 const helperSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -29,7 +29,7 @@ const helperSchema = new mongoose.Schema({
   avatar: String
 });
 
-export const Helper = mongoose.model('Helper', helperSchema);
+export const Helper = mongoose.models.Helper || mongoose.model('Helper', helperSchema);
 
 const bookingSchema = new mongoose.Schema({
   householdId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -42,7 +42,7 @@ const bookingSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-export const Booking = mongoose.model('Booking', bookingSchema);
+export const Booking = mongoose.models.Booking || mongoose.model('Booking', bookingSchema);
 
 const reviewSchema = new mongoose.Schema({
   householdId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -53,7 +53,7 @@ const reviewSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-export const Review = mongoose.model('Review', reviewSchema);
+export const Review = mongoose.models.Review || mongoose.model('Review', reviewSchema);
 
 const complaintSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -63,4 +63,4 @@ const complaintSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-export const Complaint = mongoose.model('Complaint', complaintSchema);
+export const Complaint = mongoose.models.Complaint || mongoose.model('Complaint', complaintSchema);
